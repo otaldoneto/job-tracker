@@ -11,9 +11,9 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   const body = await request.json();
 
-  if (!body.company || !body.role) {
-    return NextResponse.json({ error: "company and role are required" }, { status: 400 });
-  }
+  if (typeof body.company !== "string" || typeof body.role !== "string" || !body.company.trim() || !body.role.trim()) {
+  return NextResponse.json({ error: "company and role are required" }, { status: 400 });
+}
 
   const count = await prisma.application.count({ where: { status: "APPLIED" } });
 

@@ -1,13 +1,7 @@
 import { useDroppable } from "@dnd-kit/core";
 import { Application } from "@/generated/prisma/client";
 import { Card } from "./Card";
-
-const STATUS_LABELS: Record<Application["status"], string> = {
-  APPLIED: "Aplicado",
-  INTERVIEW: "Entrevista",
-  OFFER: "Oferta",
-  REJECTED: "Recusado",
-};
+import { STATUS_LABELS } from "@/lib/status";
 
 export function Column({
   status,

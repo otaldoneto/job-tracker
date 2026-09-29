@@ -1,5 +1,6 @@
 import { useDraggable } from "@dnd-kit/core";
 import { Application } from "@/generated/prisma/client";
+import { STATUS_COLORS } from "@/lib/status";
 
 export function Card({ application, onDelete }: { application: Application; onDelete: (id: string) => void }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: application.id });
@@ -17,7 +18,7 @@ export function Card({ application, onDelete }: { application: Application; onDe
     <div
       ref={setNodeRef}
       style={style}
-      className={`group relative rounded-md bg-white p-3 shadow-sm ${isDragging ? "opacity-50" : ""}`}
+      className={`group relative rounded-md border-l-4 bg-white p-3 shadow-sm transition-shadow duration-150 hover:shadow-md ${STATUS_COLORS[application.status]} ${isDragging ? "opacity-50" : ""}`}
     >
       <button
         onClick={handleDelete}

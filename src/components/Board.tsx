@@ -41,6 +41,11 @@ export function Board({
       body: JSON.stringify({ status: newStatus }),
     });
   }
+  function handleDelete(id: string) {
+    setApplications((current) =>
+      current.filter((application) => application.id !== id),
+    );
+  }
 
   return (
     <DndContext onDragEnd={handleDragEnd}>
@@ -57,6 +62,7 @@ export function Board({
             applications={applications
               .filter((application) => application.status === status)
               .sort((a, b) => a.position - b.position)}
+            onDelete={handleDelete}
           />
         ))}
       </div>

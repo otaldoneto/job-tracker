@@ -23,6 +23,9 @@ export function Column({
         {STATUS_LABELS[status]} <span className="text-gray-400">({applications.length})</span>
       </h2>
       <div className="flex flex-col gap-2">
+        {applications.length === 0 && (
+          <p className="text-sm text-gray-400">Nenhuma candidatura aqui ainda</p>
+        )}
         {applications.map((application) => (
           <Card key={application.id} application={application} onDelete={onDelete} />
         ))}

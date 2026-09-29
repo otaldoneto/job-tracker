@@ -12,9 +12,11 @@ export function NewApplicationForm({
   const [company, setCompany] = useState("");
   const [role, setRole] = useState("");
   const [url, setUrl] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
+    setIsSubmitting(true);
 
     const response = await fetch("/api/applications", {
       method: "POST",
@@ -28,6 +30,7 @@ export function NewApplicationForm({
     setRole("");
     setUrl("");
     setIsOpen(false);
+    setIsSubmitting(false);
   }
 
   if (!isOpen) {
@@ -68,9 +71,10 @@ export function NewApplicationForm({
       />
       <button
         type="submit"
-        className="rounded-md bg-gray-900 px-4 py-2 text-white"
+        disabled={isSubmitting}
+        className="rounded-md bg-gray-900 px-4 py-2 text-white disabled:opacity-50"
       >
-        Adicionar
+        {isSubmitting ? "Adicionando..." : "Adicionar"}
       </button>
       <button
         type="button"

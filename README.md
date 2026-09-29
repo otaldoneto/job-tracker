@@ -1,36 +1,71 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Job Tracker
 
-## Getting Started
+A Kanban board for tracking job applications, built as a full-stack Next.js app. Add a company and a role, then
+drag the card across columns as the process moves along — applied, interview, offer, rejected.
 
-First, run the development server:
+## Stack
+
+- **Next.js 16** (App Router) + **TypeScript**
+- **PostgreSQL** — persistence
+- **Prisma 7** — ORM, with the PostgreSQL driver adapter
+- **@dnd-kit** — drag-and-drop
+- **Tailwind CSS** — styling
+
+## Running it locally
+
+Requires Docker and Node.
 
 ```bash
+docker compose up -d
+npm install
+npx prisma migrate dev
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open `http://localhost:3000`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## API
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Method | Path                        | Description                          |
+|--------|-----------------------------|----------------------------------------|
+| GET    | `/api/applications`         | List all applications                 |
+| POST   | `/api/applications`         | Create an application                 |
+| PATCH  | `/api/applications/{id}`    | Update an application (status, etc.)  |
+| DELETE | `/api/applications/{id}`    | Delete an application                 |
 
-## Learn More
+## Technical decisions
 
-To learn more about Next.js, take a look at the following resources:
+**Random (`cuid`) IDs instead of sequential ones.** Same reasoning as this portfolio's
+[url-shortener](https://github.com/otaldoneto/url-shortener): a sequential ID is enumerable, revealing how many
+records exist. Prisma generates these by default; here that default is kept rather than reinvented.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**A Server Component fetches data; a Client Component owns the board's interactivity.** `page.tsx` queries Prisma
+directly — no need to call its own API over HTTP when it's already running in the same process with database
+access. Only the board itself, which needs state and event handlers for dragging, is a Client Component
+(`"use client"`).
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**PATCH, not PUT, for updates.** Dragging a card only changes its `status`; the request body only needs that one
+field, not the whole record. PATCH is the semantically correct choice for a partial update.
 
-## Deploy on Vercel
+**Optimistic UI updates.** When a card is dropped on a new column, the screen updates immediately, before the
+`PATCH` request to persist it even resolves. This keeps the board feeling responsive; the trade-off is that a
+failed request wouldn't currently roll back the visual change — acceptable here, not attempted in production code
+without a real user base to justify the complexity.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+**dnd-kit disabled during server-side rendering.** `@dnd-kit` generates internal accessibility IDs
+(`aria-describedby`) using a counter that increments differently between the server and the browser, which produces
+a React hydration mismatch. The board is loaded via `next/dynamic` with `{ ssr: false }` (through a small Client
+Component wrapper, since that option isn't allowed directly inside a Server Component) so it only ever renders in
+the browser, sidestepping the mismatch entirely.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+**Prisma 7's driver adapter.** As of Prisma 7, `new PrismaClient()` no longer connects to the database on its own
+from just a schema URL — it requires an explicit driver adapter (`@prisma/adapter-pg` for PostgreSQL) passed to its
+constructor. The generated client also no longer lives in `node_modules/@prisma/client` by default; the generator
+is configured to output to `src/generated/prisma` instead.
+
+## Limitations
+
+This is a personal tool, not a multi-user product:
+- No authentication — anyone with access to the running instance can see and edit everything.
+- No reordering within a column (only moving between columns is implemented).
+- Optimistic updates don't roll back on a failed request (see above).

@@ -1,6 +1,7 @@
 import { useDraggable } from "@dnd-kit/core";
 import { Application } from "@/generated/prisma/client";
 import { STATUS_COLORS } from "@/lib/status";
+import { formatDaysAgo } from "@/lib/date";
 
 export function Card({ application, onDelete }: { application: Application; onDelete: (id: string) => void }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: application.id });
@@ -29,6 +30,7 @@ export function Card({ application, onDelete }: { application: Application; onDe
       <div {...listeners} {...attributes} className="cursor-grab">
         <div className="font-medium">{application.company}</div>
         <div className="text-sm text-gray-500">{application.role}</div>
+        <div className="mt-1 text-xs text-gray-400">{formatDaysAgo(application.createdAt)}</div>
       </div>
     </div>
   );

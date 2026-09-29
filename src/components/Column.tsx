@@ -9,7 +9,15 @@ const STATUS_LABELS: Record<Application["status"], string> = {
   REJECTED: "Recusado",
 };
 
-export function Column({ status, applications }: { status: Application["status"]; applications: Application[] }) {
+export function Column({
+  status,
+  applications,
+  onDelete,
+}: {
+  status: Application["status"];
+  applications: Application[];
+  onDelete: (id: string) => void;
+}) {
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
   return (
@@ -22,7 +30,7 @@ export function Column({ status, applications }: { status: Application["status"]
       </h2>
       <div className="flex flex-col gap-2">
         {applications.map((application) => (
-          <Card key={application.id} application={application} />
+          <Card key={application.id} application={application} onDelete={onDelete} />
         ))}
       </div>
     </div>

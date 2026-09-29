@@ -4,10 +4,20 @@ import { useState } from "react";
 import { DndContext, DragEndEvent } from "@dnd-kit/core";
 import { Application } from "@/generated/prisma/client";
 import { Column } from "./Column";
+import { NewApplicationForm } from "./NewApplicationForm";
 
-const STATUSES: Application["status"][] = ["APPLIED", "INTERVIEW", "OFFER", "REJECTED"];
+const STATUSES: Application["status"][] = [
+  "APPLIED",
+  "INTERVIEW",
+  "OFFER",
+  "REJECTED",
+];
 
-export function Board({ initialApplications }: { initialApplications: Application[] }) {
+export function Board({
+  initialApplications,
+}: {
+  initialApplications: Application[];
+}) {
   const [applications, setApplications] = useState(initialApplications);
 
   async function handleDragEnd(event: DragEndEvent) {
@@ -19,7 +29,9 @@ export function Board({ initialApplications }: { initialApplications: Applicatio
 
     setApplications((current) =>
       current.map((application) =>
-        application.id === applicationId ? { ...application, status: newStatus } : application,
+        application.id === applicationId
+          ? { ...application, status: newStatus }
+          : application,
       ),
     );
 
@@ -32,6 +44,11 @@ export function Board({ initialApplications }: { initialApplications: Applicatio
 
   return (
     <DndContext onDragEnd={handleDragEnd}>
+      <NewApplicationForm
+        onCreated={(application) =>
+          setApplications((current) => [...current, application])
+        }
+      />
       <div className="flex gap-4 overflow-x-auto p-6">
         {STATUSES.map((status) => (
           <Column

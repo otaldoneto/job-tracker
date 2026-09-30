@@ -1,4 +1,5 @@
 import { useDroppable } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { Application } from "@/generated/prisma/client";
 import { Card } from "./Card";
 import { STATUS_LABELS } from "@/lib/status";
@@ -24,14 +25,16 @@ export function Column({
       <h2 className="mb-3 font-semibold text-gray-700">
         {STATUS_LABELS[status]} <span className="text-gray-400">({applications.length})</span>
       </h2>
-      <div className="flex flex-col gap-2">
-        {applications.length === 0 && (
-          <p className="text-sm text-gray-400">Nenhuma candidatura aqui ainda</p>
-        )}
-        {applications.map((application) => (
-          <Card key={application.id} application={application} onDelete={onDelete} onUpdate={onUpdate} />
-        ))}
-      </div>
+      <SortableContext items={applications.map((application) => application.id)} strategy={verticalListSortingStrategy}>
+        <div className="flex flex-col gap-2">
+          {applications.length === 0 && (
+            <p className="text-sm text-gray-400">Nenhuma candidatura aqui ainda</p>
+          )}
+          {applications.map((application) => (
+            <Card key={application.id} application={application} onDelete={onDelete} onUpdate={onUpdate} />
+          ))}
+        </div>
+      </SortableContext>
     </div>
   );
 }

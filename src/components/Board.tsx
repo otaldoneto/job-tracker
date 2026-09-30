@@ -41,9 +41,16 @@ export function Board({
       body: JSON.stringify({ status: newStatus }),
     });
   }
+
   function handleDelete(id: string) {
     setApplications((current) =>
       current.filter((application) => application.id !== id),
+    );
+  }
+
+  function handleUpdate(updated: Application) {
+    setApplications((current) =>
+      current.map((application) => (application.id === updated.id ? updated : application)),
     );
   }
 
@@ -63,6 +70,7 @@ export function Board({
               .filter((application) => application.status === status)
               .sort((a, b) => a.position - b.position)}
             onDelete={handleDelete}
+            onUpdate={handleUpdate}
           />
         ))}
       </div>

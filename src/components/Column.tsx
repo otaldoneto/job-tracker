@@ -7,10 +7,12 @@ export function Column({
   status,
   applications,
   onDelete,
+  onUpdate,
 }: {
   status: Application["status"];
   applications: Application[];
   onDelete: (id: string) => void;
+  onUpdate: (application: Application) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
@@ -27,7 +29,7 @@ export function Column({
           <p className="text-sm text-gray-400">Nenhuma candidatura aqui ainda</p>
         )}
         {applications.map((application) => (
-          <Card key={application.id} application={application} onDelete={onDelete} />
+          <Card key={application.id} application={application} onDelete={onDelete} onUpdate={onUpdate} />
         ))}
       </div>
     </div>

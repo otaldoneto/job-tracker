@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useDraggable } from "@dnd-kit/core";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { Application } from "@/generated/prisma/client";
 import { STATUS_COLORS } from "@/lib/status";
 import { formatDaysAgo } from "@/lib/date";
@@ -15,15 +16,16 @@ export function Card({
   onDelete: (id: string) => void;
   onUpdate: (application: Application) => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({ id: application.id });
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: application.id });
   const [isEditing, setIsEditing] = useState(false);
   const [company, setCompany] = useState(application.company);
   const [role, setRole] = useState(application.role);
   const [url, setUrl] = useState(application.url ?? "");
 
-  const style = transform
-    ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`, zIndex: 10 }
-    : undefined;
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
 
   async function handleDelete() {
     await fetch(`/api/applications/${application.id}`, { method: "DELETE" });
@@ -40,6 +42,8 @@ export function Card({
     const updated = await response.json();
     onUpdate(updated);
     setIsEditing(false);
+
+    
   }
 
   if (isEditing) {
@@ -77,8 +81,10 @@ export function Card({
       </form>
     );
   }
+  
 
   return (
+    
     <div
       ref={setNodeRef}
       style={style}
@@ -103,6 +109,16 @@ export function Card({
         <div className="text-sm text-gray-500">{application.role}</div>
         <div className="mt-1 text-xs text-gray-400">{formatDaysAgo(application.createdAt)}</div>
       </div>
+    </div>
+    
+  );
+}
+export function CardPreview({ application }: { application: Application }) {
+  return (
+    <div className={`rounded-md border-l-4 bg-white p-3 shadow-lg ${STATUS_COLORS[application.status]}`}>
+      <div className="font-medium">{application.company}</div>
+      <div className="text-sm text-gray-500">{application.role}</div>
+      <div className="mt-1 text-xs text-gray-400">{formatDaysAgo(application.createdAt)}</div>
     </div>
   );
 }
